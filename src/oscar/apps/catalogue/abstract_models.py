@@ -889,6 +889,10 @@ class AbstractProductAttribute(models.Model):
                 _("%(enum)s is not a valid choice for %(attr)s") %
                 {'enum': value, 'attr': self})
 
+    def _validate_multi_option(self, value):
+        print(type(value))
+        return value
+
     def _validate_file(self, value):
         if value and not isinstance(value, File):
             raise ValidationError(_("Must be a file field"))
@@ -926,6 +930,11 @@ class AbstractProductAttributeValue(models.Model):
         null=True,
         on_delete=models.CASCADE,
         verbose_name=_("Value option"))
+    value_multi_option = models.ManyToManyField(
+        'catalogue.AttributeOption',
+        blank=True,
+        verbose_name=_("Multi Options"),
+        related_name='productattributevalues')
     value_file = models.FileField(
         upload_to=settings.OSCAR_IMAGE_FOLDER, max_length=255,
         blank=True, null=True)
@@ -945,7 +954,11 @@ class AbstractProductAttributeValue(models.Model):
         null=True, blank=True, editable=False)
 
     def _get_value(self):
-        return getattr(self, 'value_%s' % self.attribute.type)
+        value = getattr(self, 'value_%s' % self.attribute.type)
+        try:
+            return value.all()
+        except AttributeError:
+            return value
 
     def _set_value(self, new_value):
         if self.attribute.is_option and isinstance(new_value, six.string_types):
