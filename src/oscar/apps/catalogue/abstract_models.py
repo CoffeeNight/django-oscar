@@ -890,7 +890,7 @@ class AbstractProductAttribute(models.Model):
                 {'enum': value, 'attr': self})
 
     def _validate_multi_option(self, value):
-        print(type(value))
+        # TODO: Develop the validation
         return value
 
     def _validate_file(self, value):
